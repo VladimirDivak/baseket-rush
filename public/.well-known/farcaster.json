@@ -1,0 +1,19 @@
+{
+  "accountAssociation": {
+    "protocol": "farcaster",
+    "username": "...",
+    "signature": "..."
+  },
+  "baseBuilder": {
+    "build": "...",
+    "version": "..."
+  },
+  "miniapp": [
+    {
+      "dappName": "BASEket Rush",
+      "image": "https://beta.graff.tech/logo.png",
+      "description": "Best 3D-game about Basketball in Web3",
+      "url": "https://beta.graff.tech"
+    }
+  ]
+}
