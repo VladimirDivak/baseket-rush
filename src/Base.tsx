@@ -9,7 +9,7 @@ import { validateAcountAsync } from "./modules/AccountValidationService";
 import SplashscreenLayout from "./components/layouts/SplashscreenLayout";
 import { init, isTMA, viewport, miniApp } from "@telegram-apps/sdk";
 import { validateTelegramAndPersistAccountAsync } from "./modules/TelegramValidationService";
-import { init as initMiniAppSdk } from "@farcaster/miniapp-sdk";
+import { sdk } from "@farcaster/miniapp-sdk";
 
 export type LayoutState = "splash" | "welcome" | "main" | "game";
 
@@ -31,13 +31,21 @@ function Base() {
 
   const setLayout = async () => {
     if (CurrentLayout === SplashscreenLayout) {
+      let baseApp = await sdk.isInMiniApp();
+      if (baseApp) {
+        validateAcountAsync().then((haveAccount) => {
+          setTimeout(() => {
+            setCurrentLayout(haveAccount ? "main" : "welcome");
+          }, 3000);
+        });
+      }
+
       if (isTMA()) {
         setLoadingBar(true);
         await validateTelegramAndPersistAccountAsync();
         setLoadingBar(false);
       }
       validateAcountAsync().then((haveAccount) => {
-
         setTimeout(() => {
           setCurrentLayout(haveAccount ? "main" : "welcome");
         }, 3000);
@@ -46,9 +54,6 @@ function Base() {
   };
 
   useEffect(() => {
-    const sdk = initMiniAppSdk();
-    sdk.actions.ready();
-
     if (isTMA()) {
       const cleanup = init();
 
@@ -62,9 +67,14 @@ function Base() {
           return cleanup;
         });
       }
-
       return;
     }
+
+    sdk.isInMiniApp().then((isInMiniApp) => {
+      if (isInMiniApp) {
+        sdk.actions.ready();
+      }
+    });
 
     setLayout();
   }, []);

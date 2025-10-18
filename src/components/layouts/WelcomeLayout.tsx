@@ -6,6 +6,7 @@ import type { Account } from "../../models/Accounts";
 import { SECRETKEY } from "../../utils/protectedLocalStorage";
 import { initData, type User } from "@telegram-apps/sdk";
 import { useBase } from "../../contexts/BaseContext";
+import { sdk } from "@farcaster/miniapp-sdk";
 
 export type WelcomeStep = "authentication" | "registration";
 
@@ -16,7 +17,26 @@ function WelcomeLayout() {
   const showLoginWindow = () => setIsLoginWindow(true);
 
   useEffect(() => {
-    let timeoutResource: number;
+    let timeoutResource: any;
+
+    sdk.isInMiniApp().then((isInMiniApp) => {
+      if (isInMiniApp) {
+        const account: Account = {
+          isTelegramUser: true,
+          username: "base",
+        };
+
+        window.protectedLocalStorage
+          .setItemAsync("account", JSON.stringify(account), SECRETKEY)
+          .then(() => {
+            setLoadingBar(true);
+            timeoutResource = setTimeout(() => {
+              setLoadingBar(false);
+              setCurrentLayout("main");
+            }, 2000);
+          });
+      }
+    });
 
     const user: User | undefined = initData.user() as User;
     if (!user) return;
